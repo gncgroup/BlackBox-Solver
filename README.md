@@ -1,2 +1,2 @@
 # BlackBox-Solver
-Solution for the Black Box Challange
+Solution for the Black Box Challenge
