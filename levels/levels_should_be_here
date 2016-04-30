@@ -1,0 +1,2 @@
+Git does not allow large files.
+Put test_level.data and train_level.data in this directory.
