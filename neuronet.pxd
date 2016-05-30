@@ -1,7 +1,7 @@
-cdef class MLP:
+cdef class Evo_NN:
 	cdef float n
 	cdef int* layers
-	cdef int layers_count		
+	cdef int number_of_layers		
 	cdef float*** weights 
 	cdef float** res	
 	cdef float* ask(self,float* vector)

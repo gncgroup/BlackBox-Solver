@@ -58,26 +58,3 @@ float*** float_arr_init_3d(int size_x,int* size_y,int* size_z)
     }
     return array;
 } 
-
-
-
-float* float_arr_concat(int size1,int size2,float* arr1,float* arr2)
-{
-    float* array=float_arr_init(size1+size2);
-	int i;
-	for(i=0;i<size1;i++){
-		array[i]=arr1[i];
-	}
-	for(i=0;i<size2;i++){
-		array[i+size1]=arr2[i];
-	}
-    return array;
-} 
-
-void float_arr_shift(float* array,int size)
-{ 
-	int i; 
-	for(i=size-1;i>0;i--){
-		array[i]=array[i-1];
-	}
-}
