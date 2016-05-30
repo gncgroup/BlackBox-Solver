@@ -1,15 +1,6 @@
-cdef extern from "arrayinit.c":
-	int* int_arr_init(int size)
-	float* float_arr_init(int size)
-	float** float_arr_init_2d(int size_x,int size_y) 
-	float** float_arr_init_2d_p(int size_x,int* size_y)
-	float*** float_arr_init_3d(int size_x,int* size_y,int* size_z)
-cdef extern from "compute.c":	
-	float* fprop_compute(float* vector,float*** weights,float** res,int* layers,int number_of_layers)
-	float* backprop_compute(float* vector,float* correct_output,float n,float*** weights,float** res,int* layers,int number_of_layers)
-from libc.stdlib cimport free
+from libc.stdlib cimport malloc, free
 from libc.math cimport log	
-from libc.math cimport exp
+from libc.math cimport exp 
 from libc.math cimport tanh
 from libc.math cimport abs 
 import numpy as np 
@@ -18,6 +9,56 @@ cimport cython
 import copy
 import random  
 import os.path 
+
+
+cdef int* int_arr_init(int size):
+	cdef int* array
+	array = <int*> malloc(sizeof(int)*size)
+	for i in range(size):
+		array[i] = 0
+	return array
+
+cdef float* float_arr_init(int size):
+	cdef float* array
+	array = <float*> malloc(sizeof(int)*size)
+	for i in range(size):
+		array[i] = 0
+	return array
+
+cdef float** float_arr_init_2d(int size_x,int size_y):
+	cdef float** array
+	array=<float**> malloc(sizeof(float *)*size_x) 
+	for i in range(size_x):
+		array[i] = float_arr_init(size_y)
+	return array
+	
+cdef float** float_arr_init_2d_p(int size_x,int* size_y):
+	cdef float** array
+	array=<float**> malloc(sizeof(float *)*size_x) 
+	for i in range(size_x):
+		array[i] = float_arr_init(size_y[i])
+	return array
+
+
+cdef float*** float_arr_init_3d(int size_x,int* size_y,int* size_z):
+	cdef float*** array
+	array=<float***> malloc(sizeof(float **)*size_x);
+	for i in range(size_x):
+		array[i] = float_arr_init_2d(size_y[i],size_z[i]);
+	return array;
+
+cdef float* fprop_compute(float* vector,float*** weights,float** res,int* layers,int layers_count):
+	cdef float sum
+	res[0]=vector
+	
+	for l in range(layers_count):
+		for n in range(layers[l+1]):
+			sum=weights[l][n][layers[l]] #BIAS	
+			for w in range(layers[l]):
+				sum+=res[l][w]*weights[l][n][w]
+			res[l+1][n]=1/(1+exp(-sum))
+	return res[layers_count]
+			
 cdef class Evo_NN:
 	def __init__(self,input_length,layers,number_of_layers):
 		self.n=1
@@ -38,11 +79,8 @@ cdef class Evo_NN:
 		out=self.ask(p_vector) 
 		return [out[i] for i in range(self.layers[self.number_of_layers])]
 	cdef float* ask(self,float* vector): 
-		return fprop_compute(vector,self.weights,self.res,self.layers,self.number_of_layers)
-	
-	cdef float* train(self,float* vector,float* correct_output): 
-		self.ask(vector) 
-		return backprop_compute(vector,correct_output,self.n,self.weights,self.res,self.layers,self.number_of_layers)
+		return fprop_compute(vector,self.weights,self.res,self.layers,self.number_of_layers) 
+
 	def init_weights(self):  
 		f_weights=[]
 		for l in range(self.number_of_layers):

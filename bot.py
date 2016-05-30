@@ -14,7 +14,7 @@ def prepare_bbox():
 	if bbox.is_level_loaded():
 		bbox.reset_level()
 	else:
-		bbox.load_level("../../levels/test_level.data", verbose=1)
+		bbox.load_level("../levels/test_level.data", verbose=1)
 		n_features = bbox.get_num_of_features()
 		n_actions = bbox.get_num_of_actions() 
 		

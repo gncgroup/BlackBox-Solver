@@ -1,6 +1,4 @@
-# import pyximport; pyximport.install()
-from subprocess import call
-call(["python3 setup.py build_ext --inplace"], shell=True)
+import pyximport; pyximport.install()
 import neuronet as nn
 import numpy as np
 #NeuroNet Ensemble
@@ -24,7 +22,17 @@ class NN_Ensemble:
 	def read_weights(self,path):
 		for i in range(self.NN_num):
 			self.NNs[i].read_weights(path,str(i)+"_")
- 
+
+	#Neuron with max out selection
+	def max_index(self,output):
+		v=-1e9
+		b_a=0
+		for a in range(self.output_size): 
+			if(output[a]>v):
+				v = output[a]
+				b_a = a
+		return b_a
+		
 	#Estimate accuracy calculation
 	def calc_accuracy(self,output):
 		accuracy=sorted(np.sort(output))
@@ -36,23 +44,23 @@ class NN_Ensemble:
 		output=np.zeros((self.NN_num,4))
 		for i in range(self.NN_num):
 			output[i]=self.NNs[i].compute(state) 
-		main_accuracy=self.calc_accuracy(output[0])	
-		accuracy=self.calc_accuracy(output[0])	 
-		
-		out=output[0].argmax()
-		if(accuracy>0.4):   
-			return out   
-			  
-		out=output[3].argmax()
-		output[3][3]=output[3][0]=0 
+
+		accuracy=self.calc_accuracy(output[0])				 
+		out=self.max_index(output[0])  
+		if(accuracy>0.4):  
+			return out   	
+			
+		out=self.max_index(output[3])  
+		output[3][0]=0
+		output[3][3]=0
 		accuracy=self.calc_accuracy(output[3])	
-		if(accuracy>0.95 and out in [1,2]):  
-			return out    
-			  
+		if(accuracy>0.95 and out in [1,2]): 
+			return out   
+		
 		accuracy=self.calc_accuracy(output[1])		
-		out=output[1].argmax()
-		if((accuracy>0.8 and out!=3 )):  
+		out=self.max_index(output[1])
+		if((accuracy>0.8 and out!=3 )): 
 			return out 
-			  
-		out=output[2].argmax()
+			 	
+		out=self.max_index(output[2])   
 		return out 
