@@ -5,3 +5,6 @@ Git does not allow large files.
 Put test_level.data and train_level.data in /levels/ directory.
 
 To compile use: python setup.py build_ext --inplace
+
+Publicaiton (Ru):
+http://research.nextmind.org/publications/BackBox_Challenge_Ru.pdf
